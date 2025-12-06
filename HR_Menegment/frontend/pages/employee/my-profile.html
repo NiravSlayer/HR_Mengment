@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - My Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">HRMS - Employee</a>
+            <button class="btn btn-outline-light btn-sm" id="logoutBtn">Logout</button>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <aside class="col-md-3 col-lg-2 bg-light border-end min-vh-100">
+                <div class="list-group list-group-flush py-3">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">Dashboard</a>
+                    <a href="my-profile.html" class="list-group-item list-group-item-action active">My Profile</a>
+                    <a href="my-attendance.html" class="list-group-item list-group-item-action">My Attendance</a>
+                    <a href="my-leaves.html" class="list-group-item list-group-item-action">My Leaves</a>
+                    <a href="my-tasks.html" class="list-group-item list-group-item-action">My Tasks</a>
+                    <a href="my-projects.html" class="list-group-item list-group-item-action">My Projects</a>
+                    <a href="my-documents.html" class="list-group-item list-group-item-action">My Documents</a>
+                    <a href="notifications.html" class="list-group-item list-group-item-action">Notifications</a>
+                </div>
+            </aside>
+            <main class="col-md-9 col-lg-10 p-4">
+                <h1 class="h4 mb-4">My Profile</h1>
+                <form class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" value="John">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" value="Doe">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" value="john@example.com" disabled>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control" value="+1 234 567 890">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-success">Save Changes</button>
+                    </div>
+                </form>
+            </main>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/layout-employee.js"></script>
+</body>
+
+</html>
+
+

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Leave Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">HRMS - Admin</a>
+            <button class="btn btn-outline-light btn-sm" id="logoutBtn">Logout</button>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <aside class="col-md-3 col-lg-2 bg-light border-end min-vh-100">
+                <div class="list-group list-group-flush py-3">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">Dashboard</a>
+                    <a href="employees.html" class="list-group-item list-group-item-action">Employees</a>
+                    <a href="attendance.html" class="list-group-item list-group-item-action">Attendance</a>
+                    <a href="leaves.html" class="list-group-item list-group-item-action active">Leaves</a>
+                    <a href="tasks.html" class="list-group-item list-group-item-action">Tasks</a>
+                    <a href="projects.html" class="list-group-item list-group-item-action">Projects</a>
+                    <a href="project-categories.html" class="list-group-item list-group-item-action">Project Categories</a>
+                    <a href="documents.html" class="list-group-item list-group-item-action">Documents</a>
+                    <a href="notifications.html" class="list-group-item list-group-item-action">Notifications</a>
+                    <a href="settings.html" class="list-group-item list-group-item-action">Settings</a>
+                </div>
+            </aside>
+            <main class="col-md-9 col-lg-10 p-4">
+                <h1 class="h4 mb-4">Leave Management</h1>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Leave Type</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Days</th>
+                                        <th>Status</th>
+                                        <th>Requested</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leavesTableBody">
+                                    <tr><td colspan="8" class="text-center">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Approve/Reject Modal -->
+    <div class="modal fade" id="actionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalTitle">Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="actionForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="actionLeaveId">
+                        <div class="mb-3">
+                            <label class="form-label">Comment</label>
+                            <textarea class="form-control" id="actionComment" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn" id="actionSubmitBtn">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/layout-admin.js"></script>
+    <script>
+        async function loadLeaves() {
+            try {
+                const res = await API.getLeaves();
+                const tbody = document.getElementById('leavesTableBody');
+                if (res.success && res.data.length > 0) {
+                    tbody.innerHTML = res.data.map(leave => `
+                        <tr>
+                            <td>${leave.Emp_firstName} ${leave.Emp_lastName}</td>
+                            <td>${leave.Leave_type}</td>
+                            <td>${leave.Start_date}</td>
+                            <td>${leave.End_date}</td>
+                            <td>${leave.Days}</td>
+                            <td><span class="badge bg-${leave.Status === 'Approved' ? 'success' : leave.Status === 'Rejected' ? 'danger' : 'warning'}">${leave.Status}</span></td>
+                            <td>${new Date(leave.Requested_at).toLocaleDateString()}</td>
+                            <td>
+                                ${leave.Status === 'Pending' ? `
+                                    <button class="btn btn-sm btn-success" onclick="approveLeave(${leave.Leave_id})">Approve</button>
+                                    <button class="btn btn-sm btn-danger" onclick="rejectLeave(${leave.Leave_id})">Reject</button>
+                                ` : leave.Comment ? `<small class="text-muted">${leave.Comment}</small>` : '-'}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center">No leave requests</td></tr>';
+                }
+            } catch (e) {
+                document.getElementById('leavesTableBody').innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading leaves</td></tr>';
+            }
+        }
+
+        function approveLeave(id) {
+            document.getElementById('actionLeaveId').value = id;
+            document.getElementById('actionModalTitle').textContent = 'Approve Leave';
+            document.getElementById('actionSubmitBtn').textContent = 'Approve';
+            document.getElementById('actionSubmitBtn').className = 'btn btn-success';
+            new bootstrap.Modal(document.getElementById('actionModal')).show();
+        }
+
+        function rejectLeave(id) {
+            document.getElementById('actionLeaveId').value = id;
+            document.getElementById('actionModalTitle').textContent = 'Reject Leave';
+            document.getElementById('actionSubmitBtn').textContent = 'Reject';
+            document.getElementById('actionSubmitBtn').className = 'btn btn-danger';
+            new bootstrap.Modal(document.getElementById('actionModal')).show();
+        }
+
+        document.getElementById('actionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('actionLeaveId').value);
+            const comment = document.getElementById('actionComment').value;
+            const isApprove = document.getElementById('actionModalTitle').textContent === 'Approve Leave';
+            
+            try {
+                if (isApprove) {
+                    await API.approveLeave(id, comment);
+                    alert('Leave approved successfully');
+                } else {
+                    await API.rejectLeave(id, comment);
+                    alert('Leave rejected');
+                }
+                bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                loadLeaves();
+            } catch (e) {
+                alert('Failed: ' + e.message);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadLeaves);
+    </script>
+</body>
+</html>

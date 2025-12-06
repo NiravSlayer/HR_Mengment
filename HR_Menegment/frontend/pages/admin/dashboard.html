@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">HRMS - Admin</a>
+            <button class="btn btn-outline-light btn-sm" id="logoutBtn">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <aside class="col-md-3 col-lg-2 bg-light border-end min-vh-100">
+                <div class="list-group list-group-flush py-3">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action active">Dashboard</a>
+                    <a href="employees.html" class="list-group-item list-group-item-action">Employees</a>
+                    <a href="attendance.html" class="list-group-item list-group-item-action">Attendance</a>
+                    <a href="leaves.html" class="list-group-item list-group-item-action">Leaves</a>
+                    <a href="tasks.html" class="list-group-item list-group-item-action">Tasks</a>
+                    <a href="projects.html" class="list-group-item list-group-item-action">Projects</a>
+                    <a href="project-categories.html" class="list-group-item list-group-item-action">Project Categories</a>
+                    <a href="documents.html" class="list-group-item list-group-item-action">Documents</a>
+                    <a href="notifications.html" class="list-group-item list-group-item-action">Notifications</a>
+                    <a href="settings.html" class="list-group-item list-group-item-action">Settings</a>
+                </div>
+            </aside>
+            <main class="col-md-9 col-lg-10 p-4">
+                <h1 class="h4 mb-4">Dashboard</h1>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted">Employees</h6>
+                                <h3 class="mb-0">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted">Active Projects</h6>
+                                <h3 class="mb-0">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted">Pending Leaves</h6>
+                                <h3 class="mb-0">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted">Open Tasks</h6>
+                                <h3 class="mb-0">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/layout-admin.js"></script>
+    <script>
+        // Load dashboard stats
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const stats = await API.getDashboardStats();
+                if (stats.success) {
+                    const cards = document.querySelectorAll('.card-body h3');
+                    if (cards[0]) cards[0].textContent = stats.data.totalEmployees || 0;
+                    if (cards[1]) cards[1].textContent = stats.data.totalProjects || 0;
+                    if (cards[2]) cards[2].textContent = stats.data.pendingLeaves || 0;
+                    if (cards[3]) cards[3].textContent = stats.data.pendingTasks || 0;
+                }
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+

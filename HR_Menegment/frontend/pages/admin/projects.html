@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS - Project Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">HRMS - Admin</a>
+            <button class="btn btn-outline-light btn-sm" id="logoutBtn">Logout</button>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <aside class="col-md-3 col-lg-2 bg-light border-end min-vh-100">
+                <div class="list-group list-group-flush py-3">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">Dashboard</a>
+                    <a href="employees.html" class="list-group-item list-group-item-action">Employees</a>
+                    <a href="attendance.html" class="list-group-item list-group-item-action">Attendance</a>
+                    <a href="leaves.html" class="list-group-item list-group-item-action">Leaves</a>
+                    <a href="tasks.html" class="list-group-item list-group-item-action">Tasks</a>
+                    <a href="projects.html" class="list-group-item list-group-item-action active">Projects</a>
+                    <a href="project-categories.html" class="list-group-item list-group-item-action">Project Categories</a>
+                    <a href="documents.html" class="list-group-item list-group-item-action">Documents</a>
+                    <a href="notifications.html" class="list-group-item list-group-item-action">Notifications</a>
+                    <a href="settings.html" class="list-group-item list-group-item-action">Settings</a>
+                </div>
+            </aside>
+            <main class="col-md-9 col-lg-10 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h4 mb-0">Project Management</h1>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#projectModal">Create Project</button>
+                </div>
+
+                <div class="row g-3" id="projectsContainer">
+                    <div class="col-12 text-center">Loading...</div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div class="modal fade" id="projectModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="projectForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Project Name</label>
+                            <input type="text" class="form-control" id="projectName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Project Category</label>
+                            <select class="form-select" id="projectCategory">
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="projectDescription" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="projectStartDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="projectEndDate">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="projectStatus">
+                                <option value="Active">Active</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Assign Employees</label>
+                            <select class="form-select" id="projectEmployees" multiple size="5">
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/api.js"></script>
+    <script src="../../js/layout-admin.js"></script>
+    <script>
+        let categories = [];
+        let employees = [];
+
+        async function loadCategories() {
+            try {
+                const res = await API.getProjectCategories();
+                categories = res.data || [];
+                const select = document.getElementById('projectCategory');
+                select.innerHTML = '<option value="">Select Category</option>';
+                categories.forEach(cat => {
+                    select.innerHTML += `<option value="${cat.ProjectCategory_id}">${cat.Category_name}</option>`;
+                });
+            } catch (e) {
+                console.error('Failed to load categories');
+            }
+        }
+
+        async function loadEmployees() {
+            try {
+                const res = await API.getEmployees();
+                employees = res.data || [];
+                const select = document.getElementById('projectEmployees');
+                select.innerHTML = '';
+                employees.forEach(emp => {
+                    select.innerHTML += `<option value="${emp.Emp_id}">${emp.Emp_firstName} ${emp.Emp_lastName}</option>`;
+                });
+            } catch (e) {
+                console.error('Failed to load employees');
+            }
+        }
+
+        async function loadProjects() {
+            try {
+                const res = await API.getProjects();
+                const container = document.getElementById('projectsContainer');
+                if (res.success && res.data.length > 0) {
+                    container.innerHTML = res.data.map(project => `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">${project.Project_name}</h5>
+                                    <p class="card-text text-muted small">${project.Category_name || 'No Category'}</p>
+                                    <p class="card-text">${project.Description || 'No description'}</p>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Start: ${project.Start_date || '-'}</small><br>
+                                        <small class="text-muted">End: ${project.End_date || '-'}</small>
+                                    </div>
+                                    <span class="badge bg-${project.Status === 'Active' ? 'success' : 'secondary'}">${project.Status}</span>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Assigned: ${project.employees ? project.employees.length : 0} employees</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="col-12 text-center">No projects found</div>';
+                }
+            } catch (e) {
+                document.getElementById('projectsContainer').innerHTML = '<div class="col-12 text-center text-danger">Error loading projects</div>';
+            }
+        }
+
+        document.getElementById('projectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const selectedEmployees = Array.from(document.getElementById('projectEmployees').selectedOptions).map(opt => parseInt(opt.value));
+            const data = {
+                name: document.getElementById('projectName').value,
+                categoryId: document.getElementById('projectCategory').value || null,
+                description: document.getElementById('projectDescription').value,
+                startDate: document.getElementById('projectStartDate').value || null,
+                endDate: document.getElementById('projectEndDate').value || null,
+                status: document.getElementById('projectStatus').value,
+                employeeIds: selectedEmployees
+            };
+            try {
+                await API.createProject(data);
+                alert('Project created successfully');
+                bootstrap.Modal.getInstance(document.getElementById('projectModal')).hide();
+                document.getElementById('projectForm').reset();
+                loadProjects();
+            } catch (e) {
+                alert('Failed: ' + e.message);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            loadEmployees();
+            loadProjects();
+        });
+    </script>
+</body>
+</html>
+
